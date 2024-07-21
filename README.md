@@ -45,3 +45,7 @@ MIT License
 ## Authors
 
 - Phillweston
+
+## Reference
+
+- Floyd-Fish, F. F. (2021). *Radar Signal Processing Experiment*. [RadarSignalProcessing_experiment](https://github.com/Floyd-Fish/RadarSignalProcessing_experiment).
