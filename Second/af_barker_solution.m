@@ -1,0 +1,66 @@
+code = idinput((2^7 - 1), 'prbs');
+code = code';
+Barker_code = [1, 1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1];
+T = 1e-6;
+[amf] = af_barker(code, T);
+
+function [amf] = af_barker(Barker_code, T)
+    N = length(Barker_code);
+    tau = N * T;
+    samp_num = size(Barker_code, 2) * 10;
+    n = ceil(log(samp_num) / log(2));
+    nfft = 2^n;
+    u(1:nfft) = 0;
+    u(1:samp_num) = kron(Barker_code, ones(1, 10));
+    delay = linspace(-tau, tau, nfft);
+    figure(1);
+    plot(delay * 1e6 + N, u);
+    xlabel('\tau/us');
+    ylabel('u(t)');
+    title('Waveform');
+    grid on;
+    sampling_interval = tau / nfft;
+    freqlimit = 0.5 / sampling_interval;
+    f = linspace(-freqlimit, freqlimit, nfft);
+    freq = fft(u, nfft);
+    vfft = freq;
+    freq = abs(freq) / max(abs(freq));
+    figure(2);
+    plot(f * 1e-6, fftshift(freq));
+    xlabel('f/MHz');
+    ylabel('|U(f)|');
+    title('Spectrum');
+    grid on;
+    freq_del = 12 / tau / 100;
+    freq1 = -6 / tau : freq_del : 6 / tau;
+    for k = 1:length(freq1)
+        sp = u .* exp(j * 2 * pi * freq1(k) .* delay);
+        ufft = fft(sp, nfft);
+        prod = ufft .* conj(vfft);
+        amf(k, :) = fftshift(abs(ifft(prod)));
+    end
+    amf = amf ./ max(max(amf));
+    [m, n] = find(amf == 1.0);
+    figure(3); mesh(delay * 1e6, freq1 * 1e-6, amf);
+    xlabel('\tau/us');
+    ylabel('f_d/MHz');
+    zlabel('|AF(\tau,f)|');
+    title('Ambiguity Diagram of M-sequence Signal');
+    figure(4);
+    contour(delay * 1e6, freq1 * 1e-6, amf, 1, 'b');
+    xlabel('\tau/us');
+    ylabel('f_d/MHz');
+    title('Ambiguity Diagram of M-sequence (-6dB)');
+    grid on;
+    figure(5);
+    plot(delay * 1e6, amf(m, :), 'k');
+    xlabel('\tau/us');
+    ylabel('|AF(\tau,0)|');
+    title('Distance Ambiguity Function of M-sequence');
+    grid on;
+    figure(6);
+    plot(freq1 * 1e-6, amf(:, n), 'k');
+    xlabel('f_d/MHz');
+    ylabel('|AF(0,f)|');
+    title('Velocity Ambiguity Function of M-sequence');
+end
