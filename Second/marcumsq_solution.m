@@ -30,9 +30,7 @@ function PD = marcumsq(a, b)
         alphan0 = 0.;
         dn = b / a;
     end
-    alphan_1 = 0;
     betan0 = 0.5;
-    betan_1 = 0;
     D1 = dn;
     n = 0;
     ratio = 2.0 / (a * b);
@@ -42,9 +40,7 @@ function PD = marcumsq(a, b)
         n = n + 1;
         alphan = dn + ratio * n * alphan0 + alphan;
         betan = 1.0 + ratio * n * betan0 + betan;
-        alphan_1 = alphan0;
         alphan0 = alphan;
-        betan_1 = betan0;
         betan0 = betan;
         dn = dn * D1;
     end
